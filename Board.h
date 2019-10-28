@@ -19,7 +19,7 @@ class Board {
         Board(int,int);
         bool makeMove(int, int);
         bool makeMove(int);
-        int makeRandomMove();
+        bool makeRandomMove();
         int getWinner();
         int getWidth();
         int getHeight();

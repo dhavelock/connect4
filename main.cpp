@@ -10,9 +10,7 @@ int main () {
 
     cout << endl;
 
-    while (board.getWinner() == EMPTY) {
-        board.makeRandomMove();
-    }
+    while (board.getWinner() == EMPTY && board.makeRandomMove()) ;
 
     board.printBoard();
 
