@@ -1,16 +1,32 @@
 #include <iostream>
 #include "Board.h"
+#include "Player.h"
 
 using namespace std;
 
 int main () {
     Board board (7, 6);
 
-    board.printBoard();
+    HumanPlayer player1 (RED);
+    MCTSPlayer player2 (BLACK);
 
-    cout << endl;
+    while (board.getWinner() == EMPTY) {
+        board.printBoard();
 
-    while (board.getWinner() == EMPTY && board.makeRandomMove()) ;
+        int move;
+
+        if (board.getTurn() == player1.getType()) {
+            cout << endl;
+            move = player1.makeMove(board);
+            cout << endl;
+        } else {
+            cout << endl;
+            move = player2.makeMove(board);
+            cout << endl;
+        }
+
+        board.makeMove(move);
+    }
 
     board.printBoard();
 

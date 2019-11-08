@@ -9,7 +9,7 @@ enum type { RED, BLACK, EMPTY };
 
 class Board {
     private:
-        int const NUM = 4;
+        int NUM = 4;
         int width, height;
         int numMoves;
         int turn;
@@ -23,6 +23,10 @@ class Board {
         int getWinner();
         int getWidth();
         int getHeight();
+        int getTurn();
+        Board* clone();
+        vector<int> getLegalMoves();
+        vector<vector<int> >& getBoardState() { return board; };
         void printBoard();
 };
 
