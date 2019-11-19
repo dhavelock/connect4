@@ -26,7 +26,7 @@ class HumanPlayer: public Player {
 class MCTSPlayer: public Player {
     private:
         SearchTree* st = NULL;
-        int timeout = 100000;
+        int timeout = 10;
     public:
         using Player::Player;
         int makeMove(Board board);

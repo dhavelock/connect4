@@ -1,6 +1,11 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#define HEIGHT 6
+#define WIDTH 7
+
+#define NUM_ROW 4
+
 #include <vector>
 
 using namespace std;
@@ -9,11 +14,10 @@ enum type { RED, BLACK, EMPTY };
 
 class Board {
     private:
-        int NUM = 4;
+        int NUM = NUM_ROW;
         int width, height;
         int numMoves;
         int turn;
-        vector<vector<int> > board;
 
     public:
         Board(int,int);
@@ -28,6 +32,8 @@ class Board {
         vector<int> getLegalMoves();
         vector<vector<int> >& getBoardState() { return board; };
         void printBoard();
+
+		vector<vector<int> > board;
 };
 
 #endif
