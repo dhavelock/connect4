@@ -29,7 +29,7 @@ int simulate(Board board, int move, int t) {
 
 int MCTSPlayer::makeMove(Board board) {
     // Simple way...
-    /*vector<int> availableMoves = board.getLegalMoves();
+    vector<int> availableMoves = board.getLegalMoves();
     int move = 0;
     int maxWins = 0;
     int maxPlays = 1;
@@ -39,23 +39,21 @@ int MCTSPlayer::makeMove(Board board) {
         clock_t start = clock();
         int wins = 0;
         int plays = 0;
+		//int rollouts = 0;
+		//while (rollouts++ < timeout) {
         while (clock() - start < timeout) {
             wins += simulate(board, availableMoves[i], type);
             plays++;
         }
 
-        cout << availableMoves[i] << " : " << (float)wins/(float)plays << endl;
+        //cout << availableMoves[i] << " : " << (float)wins/(float)plays << endl;
 
         if ((float)wins/(float)plays > (float)maxWins/(float)maxPlays) {
             maxWins = wins;
             maxPlays = plays;
             move = i;
         }
-    }*/
-
-	int move = runSimulation(board, type);
+    }
 	
-    cout << endl;
-
     return move;
 }

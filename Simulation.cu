@@ -1,5 +1,5 @@
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
 #include <stdio.h>
 #include <vector>
 #include <cstdlib>
@@ -11,8 +11,8 @@
 #include "Board.h"
 #include "Player.h"
 
-#define BLOCK_COUNT 1
-#define THREAD_COUNT 500
+#define BLOCK_COUNT 4
+#define THREAD_COUNT 200
 #define ROLLOUTS 50
 #define NUM 4
 
@@ -124,7 +124,7 @@ __global__ void setup_kernel(curandState* state, unsigned long seed)
 	curand_init(seed, id, 0, &state[id]);
 }
 
-__global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH], int* availableMoves, int* wins, int* totals, int numMoves, int type)
+__global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH], int* availableMoves, int *wins, int *totals, int numMoves, int type)
 {	
 	// Get Tread Id
 	int id = blockIdx.x * THREAD_COUNT + threadIdx.x;
@@ -138,7 +138,6 @@ __global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH]
 	}
 
 	clock_t start = clock();
-	//int wins = 0;
 	int plays = 0;
 	int win = 0;
 
@@ -208,18 +207,14 @@ __global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH]
 			winner = getWinner(boardCopy);
 		}
 
-		
-
 		if (getWinner(boardCopy) == type) win++;
 
 		plays++;
 	}
 
-	atomicAdd(&wins[moveIndex], win);
-	atomicAdd(&totals[moveIndex], plays);
+	wins[moveIndex] += win;
+	totals[moveIndex] += plays;
 
-	//wins[moveIndex] += win;
-	//totals[moveIndex] += plays;
 }
 
 int runSimulation(Board board, int t)
@@ -244,7 +239,7 @@ int runSimulation(Board board, int t)
 
 	// Copy values to board and availMoves
 	std::copy(&boardArr[0][0], &boardArr[0][0] + HEIGHT * WIDTH, boardStateDevice);
-	//availMovesDevice = &(board.getLegalMoves()[0]);
+	
 	for (int i = 0; i < numAvailMoves; i++) {
 		availMovesDevice[i] = board.getLegalMoves()[i];
 		wins[i] = 0;
@@ -256,6 +251,8 @@ int runSimulation(Board board, int t)
 	curandState* devStates;
 	cudaMalloc(&devStates, numAvailMoves * sizeof(curandState));
 	int seed = rand();
+
+	// Start kernel threads
 	setup_kernel << <BLOCK_COUNT, THREAD_COUNT >> > (devStates, seed);
 
 	simulate << <BLOCK_COUNT, THREAD_COUNT >> > (devStates, reinterpret_cast<int(*)[WIDTH]>(boardStateDevice), availMovesDevice, wins, totals, numAvailMoves, t);
@@ -266,8 +263,8 @@ int runSimulation(Board board, int t)
 	int maxWins = 0;
 	int maxTotals = 1;
 	for (int i = 0; i < numAvailMoves; i++) {
-		printf("device : %d : %f : %d / %d\n", availMovesDevice[i], (float)wins[i] / (float)totals[i], wins[i], totals[i]);
-		if ((float)wins[i] / (float)totals[i] > (float)maxWins / (float)maxTotals) {
+		printf("%d : %f : %d / %d\n", availMovesDevice[i], (float)wins[i] / (float)totals[i], wins[i], totals[i]);
+		if (((float)wins[i] / (float)totals[i]) > ((float)maxWins / (float)maxTotals)) {
 			maxWins = wins[i];
 			maxTotals = totals[i];
 			move = availMovesDevice[i];

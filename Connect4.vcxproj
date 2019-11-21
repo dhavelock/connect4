@@ -55,6 +55,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_35,sm_35</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -84,6 +85,7 @@
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="HumanPlayer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MCTSParallelPlayer.cpp" />
     <ClCompile Include="MCTSPlayer.cpp" />
     <ClCompile Include="RandomPlayer.cpp" />
     <ClCompile Include="SearchTree.cpp" />

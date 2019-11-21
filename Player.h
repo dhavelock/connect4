@@ -26,10 +26,18 @@ class HumanPlayer: public Player {
 class MCTSPlayer: public Player {
     private:
         SearchTree* st = NULL;
-        int timeout = 10;
+        int timeout = 50;
     public:
         using Player::Player;
         int makeMove(Board board);
+};
+
+class MCTSParallelPlayer : public Player {
+private:
+	SearchTree* st = NULL;
+public:
+	using Player::Player;
+	int makeMove(Board board);
 };
 
 #endif

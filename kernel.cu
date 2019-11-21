@@ -15,32 +15,30 @@ int main () {
 	
     Board board (WIDTH, HEIGHT);
 
-    HumanPlayer player1 (RED);
-    MCTSPlayer player2 (BLACK);
+    //HumanPlayer player1 (RED);
+	MCTSPlayer player1(RED);
+    MCTSParallelPlayer player2 (BLACK);
 
-    while (board.getWinner() == EMPTY) {
-        board.printBoard();
+	while (board.getWinner() == EMPTY) {
+		int move;
 
-        int move;
+		if (board.getTurn() == player1.getType()) {
+			move = player1.makeMove(board);
+		}
+		else {
+			move = player2.makeMove(board);
+		}
 
-        if (board.getTurn() == player1.getType()) {
-            cout << endl;
-            move = player1.makeMove(board);
-            cout << endl;
-        } else {
-            cout << endl;
-            move = player2.makeMove(board);
-            cout << endl;
-        }
+		board.makeMove(move);
 
-        board.makeMove(move);
-    }
+		board.printBoard();
+	}
 
-    board.printBoard();
+	//board.printBoard();
 
-    cout << endl;
+	//cout << endl;
 
-    cout << "Winner : " << board.getWinner() << endl;
+	cout << "Winner : " << board.getWinner() << endl;
     
     return 0;
 }
