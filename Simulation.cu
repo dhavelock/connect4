@@ -11,8 +11,8 @@
 #include "Board.h"
 #include "Player.h"
 
-#define BLOCK_COUNT 4
-#define THREAD_COUNT 200
+#define BLOCK_COUNT 1
+#define THREAD_COUNT 384
 #define ROLLOUTS 50
 #define NUM 4
 
@@ -25,7 +25,7 @@ __device__ int getWinner(int boardState[HEIGHT][WIDTH]) {
 	int lastColor = EMPTY;
 	for (int i = HEIGHT - 1; i >= 0; i--) {
 		for (int j = 0; j < WIDTH; j++) {
-			if (boardState[i][j] != EMPTY/* && (board[i][j] == lastColor || (lastColor != board[i][j] && numInRow == 0))*/) {
+			if (boardState[i][j] != EMPTY) {
 				if (boardState[i][j] != lastColor) {
 					numInRow = 0;
 				}
@@ -66,7 +66,7 @@ __device__ int getWinner(int boardState[HEIGHT][WIDTH]) {
 	// Check Diagonal bottom left to top right
 	for (int i = NUM - 1; i < WIDTH + HEIGHT - NUM; i++) {
 		for (int j = i < HEIGHT ? 0 : i - HEIGHT + 1; j < WIDTH && i - j >= 0; j++) {
-			if (boardState[i - j][j] != EMPTY/* && (board[i-j][j] == lastColor || (lastColor != board[i-j][j] && numInRow == 0))*/) {
+			if (boardState[i - j][j] != EMPTY) {
 				if (boardState[i - j][j] != lastColor) {
 					numInRow = 0;
 				}
@@ -88,7 +88,7 @@ __device__ int getWinner(int boardState[HEIGHT][WIDTH]) {
 	// Check Diagonal top left to bottom right
 	for (int i = NUM - WIDTH; i < HEIGHT - NUM - 1; i++) {
 		for (int j = i >= 0 ? 0 : -i; j < WIDTH && i + j < HEIGHT; j++) {
-			if (boardState[i + j][j] != EMPTY/* && (board[i+j][j] == lastColor || (lastColor != board[i+j][j] && numInRow == 0))*/) {
+			if (boardState[i + j][j] != EMPTY) {
 				if (lastColor != boardState[i + j][j]) {
 					numInRow = 0;
 				}
@@ -165,6 +165,8 @@ __global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH]
 			}
 		}
 
+		if (!success) printf("FAILED TO MAKE MOVE : moveIndex %d : %d\n", moveIndex, availableMoves[moveIndex]);
+
 		// Perform Random Playout
 		int winner = getWinner(boardCopy);
 
@@ -188,7 +190,7 @@ __global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH]
 
 			// Make random move
 			number = generate(globalState, id) * 1000000;
-			int randomMove = number % numMoves;
+			int randomMove = availableMoves[number % numMoves];
 			int randomSuccess = false;
 			while (!randomSuccess) {
 				randomSuccess = false;
@@ -201,7 +203,7 @@ __global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH]
 					}
 				}
 				number = generate(globalState, id) * 1000000;
-				randomMove = number % numMoves;
+				randomMove = availableMoves[number % numMoves];
 			}
 			
 			winner = getWinner(boardCopy);
@@ -212,8 +214,8 @@ __global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH]
 		plays++;
 	}
 
-	wins[moveIndex] += win;
-	totals[moveIndex] += plays;
+	atomicAdd(&(wins[moveIndex]), win);
+	atomicAdd(&(totals[moveIndex]), plays);
 
 }
 
@@ -264,7 +266,7 @@ int runSimulation(Board board, int t)
 	int maxTotals = 1;
 	for (int i = 0; i < numAvailMoves; i++) {
 		printf("%d : %f : %d / %d\n", availMovesDevice[i], (float)wins[i] / (float)totals[i], wins[i], totals[i]);
-		if (((float)wins[i] / (float)totals[i]) > ((float)maxWins / (float)maxTotals)) {
+		if (((float)wins[i] / (float)totals[i]) >= ((float)maxWins / (float)maxTotals)) {
 			maxWins = wins[i];
 			maxTotals = totals[i];
 			move = availMovesDevice[i];
@@ -277,6 +279,8 @@ int runSimulation(Board board, int t)
 	cudaFree(devStates);
 	cudaFree(boardStateDevice);
 	cudaFree(availMovesDevice);
+
+	printf("Parallel : %d\n", move);
 
 	return move;
 }

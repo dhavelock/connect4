@@ -40,7 +40,6 @@ vector<int> Board::getLegalMoves() {
             moves.push_back(i);
         }
     }
-    cout << endl;
     return moves;
 }
 
@@ -86,7 +85,7 @@ int Board::getWinner() {
     int lastColor = EMPTY;
     for (int i = height-1; i >= 0; i--) {
         for (int j = 0; j < width; j++) {
-            if (board[i][j] != EMPTY/* && (board[i][j] == lastColor || (lastColor != board[i][j] && numInRow == 0))*/) {
+            if (board[i][j] != EMPTY) {
                 if (board[i][j] != lastColor) {
                     numInRow = 0;
                 }
@@ -125,7 +124,7 @@ int Board::getWinner() {
     // Check Diagonal bottom left to top right
     for (int i = NUM-1; i < width+height-NUM; i++) {        
         for (int j = i < height ? 0 : i-height+1; j < width && i-j >= 0; j++) {
-            if (board[i-j][j] != EMPTY/* && (board[i-j][j] == lastColor || (lastColor != board[i-j][j] && numInRow == 0))*/) {
+            if (board[i-j][j] != EMPTY) {
                 if (board[i-j][j] != lastColor) {
                     numInRow = 0;
                 }
@@ -146,7 +145,7 @@ int Board::getWinner() {
     // Check Diagonal top left to bottom right
     for (int i = NUM-width; i < height-NUM-1; i++) {
         for (int j = i >= 0 ? 0 : -i; j < width && i+j < height; j++) {
-            if (board[i+j][j] != EMPTY/* && (board[i+j][j] == lastColor || (lastColor != board[i+j][j] && numInRow == 0))*/) {
+            if (board[i+j][j] != EMPTY) {
                 if (lastColor != board[i+j][j]) {
                     numInRow = 0;
                 }

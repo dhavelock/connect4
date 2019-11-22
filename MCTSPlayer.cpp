@@ -27,7 +27,7 @@ int simulate(Board board, int move, int t) {
 	return win;
 }
 
-int MCTSPlayer::makeMove(Board board) {
+int MCTSPlayer::makeMove(Board board, double duration) {
     // Simple way...
     vector<int> availableMoves = board.getLegalMoves();
     int move = 0;
@@ -35,25 +35,28 @@ int MCTSPlayer::makeMove(Board board) {
     int maxPlays = 1;
 	int numAvailMoves = availableMoves.size();
 
+	if (duration == 0) duration = 1;
+
     for (int i = 0; i < numAvailMoves; i++) {
         clock_t start = clock();
         int wins = 0;
         int plays = 0;
-		//int rollouts = 0;
-		//while (rollouts++ < timeout) {
-        while (clock() - start < timeout) {
+		
+        while ((double)(clock() - start) / CLOCKS_PER_SEC < (double)(duration / (float)numAvailMoves)) {
             wins += simulate(board, availableMoves[i], type);
             plays++;
         }
 
-        //cout << availableMoves[i] << " : " << (float)wins/(float)plays << endl;
+        cout << availableMoves[i] << " : " << (float)wins / (float)plays << " : " << (float)wins << " / " << (float)plays << endl;
 
-        if ((float)wins/(float)plays > (float)maxWins/(float)maxPlays) {
+        if ((float)wins/(float)plays >= (float)maxWins/(float)maxPlays) {
             maxWins = wins;
             maxPlays = plays;
-            move = i;
+            move = availableMoves[i];
         }
     }
+
+	printf("Sequential : %d\n", move);
 	
     return move;
 }
