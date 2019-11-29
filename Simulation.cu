@@ -137,12 +137,10 @@ __global__ void simulate(curandState* globalState, int boardState[HEIGHT][WIDTH]
 		}
 	}
 
-	clock_t start = clock();
 	int plays = 0;
 	int win = 0;
 
 	// Simulate Games
-	//while (clock() - start < 100) {
 	while(plays < ROLLOUTS) {
 
 		// Create Board Copy
